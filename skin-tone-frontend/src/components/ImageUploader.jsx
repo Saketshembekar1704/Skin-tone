@@ -1,13 +1,16 @@
+import { useRef } from "react";
+
 export default function ImageUploader({ onImageLoad }) {
   const inputRef = useRef(null);
 
-  const handleFileChange = (e) => {
+  const handleChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    const img = new Image();
-    img.onload = () => onImageLoad(img);
-    img.src = URL.createObjectURL(file);
+    onImageLoad({
+      file, // for backend
+      previewUrl: URL.createObjectURL(file), // for canvas
+    });
   };
 
   return (
@@ -15,16 +18,14 @@ export default function ImageUploader({ onImageLoad }) {
       <input
         ref={inputRef}
         type="file"
-        accept="image/png, image/jpeg"
+        accept="image/png,image/jpeg"
         style={{ display: "none" }}
-        onChange={handleFileChange}
+        onChange={handleChange}
       />
 
-      <button
-        type="button"
-        className="primary-btn"
-        onClick={() => inputRef.current.click()}
-      >
+      <button type="button" onClick={() => inputRef.current.click()}
+        style={{margin: "20px"}}
+        >
         Upload Image
       </button>
     </>

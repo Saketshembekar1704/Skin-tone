@@ -3,25 +3,22 @@ import ImageUploader from "./components/ImageUploader";
 import CanvasSelector from "./components/CanvasSelector";
 import ResultPanel from "./components/ResultPanel";
 
-function App() {
-  const [image, setImage] = useState(null);
+export default function App() {
+  const [imageData, setImageData] = useState(null);
   const [result, setResult] = useState(null);
 
+
   return (
-    <div className="app-root">
-      <div className="app-container">
-        <h1>Skin Tone Detection</h1>
+    <div style={{ padding: 40 }}>
+      <h1>Skin Tone Detection</h1>
 
-        <ImageUploader onImageLoad={setImage} />
+      <ImageUploader onImageLoad={setImageData} />
 
-        {image && <CanvasSelector image={image} onResult={setResult} />}
-        {result && <ResultPanel result={result} />}
-      </div>
+      {imageData && (
+        <CanvasSelector imageData={imageData} onResult={setResult} />
+      )}
+
+      {result && <ResultPanel result={result} />}
     </div>
   );
-
 }
-
-
-
-export default App;

@@ -1,38 +1,50 @@
-// src/services/api.js
-export async function sendToBackend(image, mask) {
-  const blob = await fetch(image.src).then((r) => r.blob());
+function canvasToFile(canvas, filename) {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (!blob) {
+        reject(new Error("Failed to convert canvas to blob"));
+        return;
+      }
+      resolve(new File([blob], filename, { type: "image/png" }));
+    });
+  });
+}
 
+export async function sendToBackend(imageFile, masks, regionType) {
   const formData = new FormData();
-  formData.append("image", blob);
-  formData.append("mask", JSON.stringify(mask));
+  
+  // Add the original image
+  formData.append("image", imageFile);
+  
+  // Convert each mask canvas to a file and append it
+  if (masks.hair) {
+    const hairMaskFile = await canvasToFile(masks.hair, "hair_mask.png");
+    formData.append("hair_mask", hairMaskFile);
+  }
+  
+  if (masks.skin) {
+    const skinMaskFile = await canvasToFile(masks.skin, "skin_mask.png");
+    formData.append("skin_mask", skinMaskFile);
+  }
+  
+  if (masks.hand) {
+    const handMaskFile = await canvasToFile(masks.hand, "hand_mask.png");
+    formData.append("hand_mask", handMaskFile);
+  }
+  
+  formData.append("region_type", regionType);
 
-  const res = await fetch("http://localhost:8000/analyze", {
+  const response = await fetch("http://localhost:8000/analyze", {
     method: "POST",
     body: formData,
   });
 
-  return res.json();
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Backend error ${response.status}: ${errorText}`);
+  }
+
+  return await response.json();
 }
 
 
-// src/services/api.js
-/*export async function sendToBackend(image, mask) {
-  console.log("MOCK backend called");
-  console.log("Mask points:", mask.length);
-
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        skin_type: "Light / Honey",
-        undertone: "Warm",
-        top_colors: [
-          { color: "Olive Green", percent: 32 },
-          { color: "Mustard Yellow", percent: 24 },
-          { color: "Cream", percent: 18 }
-        ],
-        explanation:
-          "Warm undertones pair well with earthy and warm colors, providing natural contrast."
-      });
-    }, 800);
-  });
-} */
