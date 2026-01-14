@@ -5,134 +5,106 @@ export default function ResultPanel({ result }) {
 
   if (!combined_analysis || combined_analysis.error) {
     return (
-      <div style={{ marginTop: 30, textAlign: "center" }}>
-        <p>No analysis results available</p>
+      <div className="result-error">
+        <p>No analysis results available. {combined_analysis?.error || "Please try again."}</p>
       </div>
     );
   }
 
   const {
     overall_undertone,
+    raw_depth,
+    raw_undertone,
     representative_color,
     regions_analyzed,
     recommended_clothing_colors,
     explanation
   } = combined_analysis;
 
-  return (
-    <div style={{ marginTop: 30, textAlign: "center" }}>
-      <h2>Recommended Clothing Colors</h2>
-      <p style={{ color: "#666", fontSize: 14, marginTop: 5 }}>
-        Based on {regions_analyzed.map((r, i) => (
-          <span key={r}>
-            {r.charAt(0).toUpperCase() + r.slice(1)}
-            {i < regions_analyzed.length - 1 ? (i === regions_analyzed.length - 2 ? " and " : ", ") : ""}
-          </span>
-        ))} analysis
-      </p>
-      <p style={{ color: "#444", fontSize: 16, fontWeight: "600", marginTop: 10 }}>
-        Overall Undertone: {overall_undertone}
-      </p>
+  // Fallback for older backend response or single string
+  const displayDepth = raw_depth || overall_undertone?.split(" ")[0] || "Unknown";
+  const displayUndertone = raw_undertone || overall_undertone?.split(" ")[1] || overall_undertone || "Unknown";
 
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          justifyContent: "center",
-          marginTop: 30,
-          gap: 15,
-          maxWidth: 800,
-          margin: "30px auto 0",
-        }}
-      >
-        {/* Representative color */}
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-        >
-          <div
-            style={{
-              width: 80,
-              height: 80,
-              borderRadius: 8,
-              backgroundColor: representative_color,
-              boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 12,
-              fontWeight: "600",
-              color: "#fff",
-              textShadow: "1px 1px 2px rgba(0,0,0,0.8)",
-            }}
-          >
-            Main
-          </div>
-          <div style={{ fontSize: 11, marginTop: 5, color: "#666", fontWeight: "500" }}>
-            Your Tone
+  return (
+    <div className="result-panel">
+      {/* Header */}
+      <div className="result-header animate-fadeInUp">
+        <h2>✨ Your Personalized Palette</h2>
+        <p className="result-subtitle">
+          Based on {regions_analyzed.map((r, i) => (
+            <span key={r}>
+              {r.charAt(0).toUpperCase() + r.slice(1)}
+              {i < regions_analyzed.length - 1 ? (i === regions_analyzed.length - 2 ? " and " : ", ") : ""}
+            </span>
+          ))} analysis
+        </p>
+      </div>
+
+      {/* Analysis Badges - Depth & Undertone */}
+      <div className="analysis-badges animate-scaleIn">
+        {/* Skin Depth */}
+        <div className="analysis-card">
+          <div className="badge-icon">🌞</div>
+          <div className="badge-content">
+            <div className="badge-label">Skin Depth</div>
+            <div className="badge-value">{displayDepth}</div>
           </div>
         </div>
 
-        {/* Recommended clothing colors with match percentage */}
+        {/* Undertone */}
+        <div className="analysis-card">
+          <div className="badge-icon">🎨</div>
+          <div className="badge-content">
+            <div className="badge-label">Undertone</div>
+            <div className="badge-value">{displayUndertone}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Color Grid */}
+      <div className="color-grid">
+        {/* Representative Color */}
+        <div className="color-card representative animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
+          <div
+            className="color-swatch large"
+            style={{ backgroundColor: representative_color }}
+          >
+            <div className="color-label">Your Tone</div>
+          </div>
+          <div className="color-info">
+            <div className="color-name">Representative</div>
+            <div className="color-hex">{representative_color}</div>
+          </div>
+        </div>
+
+        {/* Recommended Colors */}
         {recommended_clothing_colors?.map((color, index) => (
           <div
             key={index}
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-            }}
+            className="color-card animate-fadeInUp"
+            style={{ animationDelay: `${0.2 + index * 0.1}s` }}
           >
             <div
-              title={`${color.name} - ${color.match_percentage}% match`}
-              style={{
-                width: 80,
-                height: 80,
-                borderRadius: 8,
-                backgroundColor: color.hex,
-                boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
-                position: "relative",
-                display: "flex",
-                alignItems: "flex-end",
-                justifyContent: "center",
-                paddingBottom: 5,
-              }}
+              className="color-swatch"
+              style={{ backgroundColor: color.hex }}
             >
-              {/* Match percentage badge */}
-              <div
-                style={{
-                  position: "absolute",
-                  top: -8,
-                  right: -8,
-                  backgroundColor: "#4CAF50",
-                  color: "white",
-                  borderRadius: "50%",
-                  width: 36,
-                  height: 36,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 11,
-                  fontWeight: "bold",
-                  boxShadow: "0 2px 4px rgba(0,0,0,0.3)",
-                }}
-              >
+              <div className="match-badge">
                 {Math.round(color.match_percentage)}%
               </div>
             </div>
-            <div style={{ fontSize: 12, marginTop: 5, fontWeight: "500" }}>
-              {color.name}
+            <div className="color-info">
+              <div className="color-name">{color.name}</div>
+              <div className="color-hex">{color.hex}</div>
             </div>
           </div>
         ))}
       </div>
 
-      <p style={{ color: "#666", fontSize: 13, marginTop: 30, fontStyle: "italic" }}>
-        {explanation}
-      </p>
+      {/* Explanation */}
+      <div className="result-explanation animate-fadeIn">
+        <div className="explanation-icon">💡</div>
+        <p>{explanation}</p>
+      </div>
     </div>
   );
 }

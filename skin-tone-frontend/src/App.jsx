@@ -7,18 +7,37 @@ export default function App() {
   const [imageData, setImageData] = useState(null);
   const [result, setResult] = useState(null);
 
-
   return (
-    <div style={{ padding: 40 }}>
-      <h1>Skin Tone Detection</h1>
+    <div className="app-container">
+      {/* Hero Section */}
+      <div className="hero-section animate-fadeInUp">
+        <h1>Virtual Try-On Studio</h1>
+        <p className="hero-subtitle">
+          Discover your perfect colors with AI-powered skin tone analysis
+        </p>
+      </div>
 
-      <ImageUploader onImageLoad={setImageData} />
+      {/* Main Content Card */}
+      <div className="main-card glass-card animate-fadeInUp">
+        <ImageUploader onImageLoad={setImageData} />
 
-      {imageData && (
-        <CanvasSelector imageData={imageData} onResult={setResult} />
-      )}
+        {imageData && (
+          <div className="canvas-section animate-scaleIn">
+            <CanvasSelector imageData={imageData} onResult={setResult} />
+          </div>
+        )}
 
-      {result && <ResultPanel result={result} />}
+        {result && (
+          <div className="results-section">
+            <ResultPanel result={result} />
+          </div>
+        )}
+      </div>
+
+      {/* Footer */}
+      <div className="footer animate-fadeIn">
+        <p>Powered by Advanced ML Skin Tone Detection</p>
+      </div>
     </div>
   );
 }
